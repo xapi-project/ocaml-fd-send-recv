@@ -1,6 +1,6 @@
 # OASIS_START
-# DO NOT EDIT (digest: 18cd88dd84aee043473789acd18ac8b6)
-version = "0.1"
+# DO NOT EDIT (digest: 281ef2943e7fb8969a7bce67d87ed960)
+version = "1.0.0"
 description =
 "Bindings to sendmsg/recvmsg which allow fds to be sent/received"
 requires = "unix"

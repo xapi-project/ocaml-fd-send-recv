@@ -17,7 +17,7 @@
 exception Unix_error of int
 (** Thrown by the low-level C functions *)
 
-val send_fd : Unix.file_descr -> string -> int -> int ->
+val send_fd : Unix.file_descr -> bytes -> int -> int ->
   Unix.msg_flag list -> Unix.file_descr -> int
 (** [send_fd channel_fd buf ofs len flags fd_to_send] sends a message
 	  over [channel_fd] containing the [buf] [ofs] [len] substring, with
@@ -26,7 +26,7 @@ val send_fd : Unix.file_descr -> string -> int -> int ->
 	  (e.g. of size greater than zero) to actually have the fd
 	  passed. *)
 
-val recv_fd : Unix.file_descr -> string -> int -> int ->
+val recv_fd : Unix.file_descr -> bytes -> int -> int ->
   Unix.msg_flag list -> int * Unix.sockaddr * Unix.file_descr
 (** [recv_fd channel_fd buf ofs len flags] receives a message into
     substring [buf] [ofs] [len] with [flags], returning the number of

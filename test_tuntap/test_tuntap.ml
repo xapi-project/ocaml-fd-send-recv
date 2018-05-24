@@ -10,7 +10,7 @@ let t_receivefd fd =
 
 let t_sendfd fd =
   let fd_to_send, iface_name = Tuntap.opentap () in
-  let nb_sent = send_fd fd (Bytes.unsafe_of_string iface_name) 0 (String.length iface_name) [] fd_to_send in
+  let nb_sent = send_fd_substring fd iface_name 0 (String.length iface_name) [] fd_to_send in
   Printf.printf "[sender] sent %d bytes [%s], sent fd = %d\n%!" nb_sent
     (String.sub iface_name 0 nb_sent) (int_of_fd fd_to_send)
 

@@ -3,14 +3,14 @@ open Fd_send_recv
 
 let t_receivefd fd =
   Printf.printf "[receiver] t_receivedfd thread started!\n%!";
-  let buf = String.make (Tuntap.get_ifnamsiz ()) '\000' in
-  let nb_read, remote_saddr, fd_recv = recv_fd fd buf 0 (String.length buf) [] in
+  let buf = Bytes.make (Tuntap.get_ifnamsiz ()) '\000' in
+  let nb_read, remote_saddr, fd_recv = recv_fd fd buf 0 (Bytes.length buf) [] in
   Printf.printf "[receiver] Received %d bytes [%s], received fd = %d\n%!" 
-    nb_read (String.sub buf 0 nb_read) (int_of_fd fd_recv)
+    nb_read (Bytes.sub_string buf 0 nb_read) (int_of_fd fd_recv)
 
 let t_sendfd fd =
   let fd_to_send, iface_name = Tuntap.opentap () in
-  let nb_sent = send_fd fd iface_name 0 (String.length iface_name) [] fd_to_send in
+  let nb_sent = send_fd fd (Bytes.unsafe_of_string iface_name) 0 (String.length iface_name) [] fd_to_send in
   Printf.printf "[sender] sent %d bytes [%s], sent fd = %d\n%!" nb_sent
     (String.sub iface_name 0 nb_sent) (int_of_fd fd_to_send)
 

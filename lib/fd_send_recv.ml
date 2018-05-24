@@ -16,8 +16,11 @@ exception Unix_error of int
 
 let _ = Callback.register_exception "fd_send_recv.unix_error" (Unix_error (0))
 
-external send_fd : Unix.file_descr -> string -> int -> int -> Unix.msg_flag list -> Unix.file_descr -> int = "stub_unix_send_fd_bytecode" "stub_unix_send_fd"
-external recv_fd : Unix.file_descr -> string -> int -> int -> Unix.msg_flag list -> int * Unix.sockaddr * Unix.file_descr = "stub_unix_recv_fd"
+external send_fd : Unix.file_descr -> bytes -> int -> int -> Unix.msg_flag list -> Unix.file_descr -> int = "stub_unix_send_fd_bytecode" "stub_unix_send_fd"
+external recv_fd : Unix.file_descr -> bytes -> int -> int -> Unix.msg_flag list -> int * Unix.sockaddr * Unix.file_descr = "stub_unix_recv_fd"
+
+let send_fd_substring channel_fd buf ofs len flags fd_to_send =
+    send_fd channel_fd (Bytes.unsafe_of_string buf) ofs len flags fd_to_send
 
 let fd_of_int (x: int) : Unix.file_descr = Obj.magic x
 

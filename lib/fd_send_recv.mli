@@ -32,6 +32,10 @@ val recv_fd : Unix.file_descr -> bytes -> int -> int ->
     substring [buf] [ofs] [len] with [flags], returning the number of
     bytes read, the address of the peer and a file descriptor. *)
 
+val send_fd_substring : Unix.file_descr -> string -> int -> int ->
+  Unix.msg_flag list -> Unix.file_descr -> int
+(** Like [send_fd] but takes a string *)
+
 val int_of_fd : Unix.file_descr -> int
 (** [int_of_fd fd] returns the underlying unix integer file descriptor
     associated with OCaml Unix.file_descr [fd]. *)

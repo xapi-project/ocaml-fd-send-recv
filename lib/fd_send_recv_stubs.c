@@ -34,18 +34,6 @@
 #include <caml/callback.h>
 #include <caml/unixsupport.h>
 
-void raise_error(int code)
-{
-	static const value *exn = NULL;
-
-	if (!exn) {
-		exn = caml_named_value("fd_send_recv.unix_error");
-		if (!exn)
-			caml_invalid_argument("fd_send_recv.unix_error not initialiazed");
-	}
-	caml_raise_with_arg(*exn, Val_int(code));
-}
-
 static int msg_flag_table[] = {
   MSG_OOB, MSG_DONTROUTE, MSG_PEEK
 };
@@ -99,8 +87,7 @@ CAMLprim value stub_unix_send_fd(value sock, value buff, value ofs, value len, v
   caml_leave_blocking_section();
 
   if(ret == -1) {
-    perror("sendmsg");
-    raise_error(errno);
+    caml_uerror("sendmsg", Nothing);
   }
 #else
   caml_failwith("stub_unix_send_fd not implementable on Win32");
@@ -151,8 +138,7 @@ CAMLprim value stub_unix_recv_fd(value sock, value buff, value ofs, value len, v
   caml_leave_blocking_section();
 
   if(ret == -1) {
-    perror("recvmsg");
-    raise_error(errno);
+    caml_uerror("recvmsg", Nothing);
   }
 
   if(ret>0 && msg.msg_controllen>0) {

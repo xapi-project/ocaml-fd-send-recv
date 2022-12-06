@@ -34,18 +34,6 @@
 #include <caml/callback.h>
 #include <caml/unixsupport.h>
 
-void raise_error(int code)
-{
-	static value *exn = NULL;
-
-	if (!exn) {
-		exn = caml_named_value("fd_send_recv.unix_error");
-		if (!exn)
-			caml_invalid_argument("fd_send_recv.unix_error not initialiazed");
-	}
-	caml_raise_with_arg(*exn, Val_int(code));
-}
-
 static int msg_flag_table[] = {
   MSG_OOB, MSG_DONTROUTE, MSG_PEEK
 };
@@ -64,7 +52,7 @@ CAMLprim value stub_unix_send_fd(value sock, value buff, value ofs, value len, v
 
   cfd = Int_val(fd);
 
-  cv_flags = convert_flag_list(flags,msg_flag_table);
+  cv_flags = caml_convert_flag_list(flags,msg_flag_table);
 
   numbytes = Long_val(len);
   if (numbytes > UNIX_BUFSIZ) numbytes = UNIX_BUFSIZ;
@@ -99,8 +87,7 @@ CAMLprim value stub_unix_send_fd(value sock, value buff, value ofs, value len, v
   caml_leave_blocking_section();
 
   if(ret == -1) {
-    perror("sendmsg");
-    raise_error(errno);
+    caml_uerror("sendmsg", Nothing);
   }
 #else
   caml_failwith("stub_unix_send_fd not implementable on Win32");
@@ -125,7 +112,7 @@ CAMLprim value stub_unix_recv_fd(value sock, value buff, value ofs, value len, v
   char buf[CMSG_SPACE(sizeof(fd))];
   struct sockaddr_un unix_socket_name;
 
-  cv_flags = convert_flag_list(flags,msg_flag_table);
+  cv_flags = caml_convert_flag_list(flags,msg_flag_table);
 
   struct msghdr msg;
   struct iovec vec;
@@ -151,8 +138,7 @@ CAMLprim value stub_unix_recv_fd(value sock, value buff, value ofs, value len, v
   caml_leave_blocking_section();
 
   if(ret == -1) {
-    perror("recvmsg");
-    raise_error(errno);
+    caml_uerror("recvmsg", Nothing);
   }
 
   if(ret>0 && msg.msg_controllen>0) {
@@ -160,7 +146,7 @@ CAMLprim value stub_unix_recv_fd(value sock, value buff, value ofs, value len, v
     if(cmsg->cmsg_level == SOL_SOCKET && (cmsg->cmsg_type == SCM_RIGHTS)) {
       fd=Val_int(*(int*)CMSG_DATA(cmsg));
     } else {
-      failwith("Failed to receive an fd!");
+      caml_failwith("Failed to receive an fd!");
     }
   } else {
     fd=Val_int(-1);
@@ -171,16 +157,16 @@ CAMLprim value stub_unix_recv_fd(value sock, value buff, value ofs, value len, v
 
   memmove(&Byte(buff, Long_val(ofs)), iobuf, numbytes);
 
-  addr=alloc_small(1,0); /* Unix.sockaddr; must be an ADDR_UNIX of string */
+  addr=caml_alloc_small(1,0); /* Unix.sockaddr; must be an ADDR_UNIX of string */
   Field(addr, 0) = Val_unit; /* must set all fields before next allocation */
 
   if(ret>0) {
-    Field(addr,0) = copy_string(unix_socket_name.sun_path);
+    Field(addr,0) = caml_copy_string(unix_socket_name.sun_path);
   } else {
-    Field(addr,0) = copy_string("nothing");
+    Field(addr,0) = caml_copy_string("nothing");
   }
 
-  res=alloc_small(3,0);
+  res=caml_alloc_small(3,0);
   Field(res,0) = Val_int(ret);
   Field(res,1) = addr;
   Field(res,2) = fd;

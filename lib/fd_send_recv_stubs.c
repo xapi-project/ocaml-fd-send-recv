@@ -34,6 +34,11 @@
 #include <caml/callback.h>
 #include <caml/unixsupport.h>
 
+#include <caml/version.h>
+#if OCAML_VERSION_MAJOR < 5
+#define caml_uerror uerror
+#endif
+
 static int msg_flag_table[] = {
   MSG_OOB, MSG_DONTROUTE, MSG_PEEK
 };
